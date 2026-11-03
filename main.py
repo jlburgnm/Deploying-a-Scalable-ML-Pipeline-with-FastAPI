@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from ml.data import apply_label, process_data
 from ml.model import inference, load_model
 
+
 # DO NOT MODIFY
 class Data(BaseModel):
     age: int = Field(..., example=37)
@@ -26,30 +27,31 @@ class Data(BaseModel):
     hours_per_week: int = Field(..., example=40, alias="hours-per-week")
     native_country: str = Field(..., example="United-States", alias="native-country")
 
-path = None # TODO: enter the path for the saved encoder 
-encoder = load_model(path)
 
-path = None # TODO: enter the path for the saved model 
-model = load_model(path)
+project_path = os.path.dirname(os.path.abspath(__file__))
+encoder_path = os.path.join(project_path, "model", "encoder.pkl")
+model_path = os.path.join(project_path, "model", "model.pkl")
 
-# TODO: create a RESTful API using FastAPI
-app = None # your code here
 
-# TODO: create a GET on the root giving a welcome message
+encoder = load_model(encoder_path)
+model = load_model(model_path)
+
+
+app = FastAPI()
+
+
 @app.get("/")
 async def get_root():
-    """ Say hello!"""
-    # your code here
-    pass
+    return {"message": "Welcome to the census salary prediction API"}
 
 
-# TODO: create a POST on a different path that does model inference
 @app.post("/data/")
 async def post_inference(data: Data):
     # DO NOT MODIFY: turn the Pydantic model into a dict.
     data_dict = data.dict()
     # DO NOT MODIFY: clean up the dict to turn it into a Pandas DataFrame.
-    # The data has names with hyphens and Python does not allow those as variable names.
+    # The data has names with hyphens and Python does not allow those
+    # as variable names.
     # Here it uses the functionality of FastAPI/Pydantic/etc to deal with this.
     data = {k.replace("_", "-"): [v] for k, v in data_dict.items()}
     data = pd.DataFrame.from_dict(data)
@@ -65,10 +67,10 @@ async def post_inference(data: Data):
         "native-country",
     ]
     data_processed, _, _, _ = process_data(
-        # your code here
-        # use data as data input
-        # use training = False
-        # do not need to pass lb as input
+        X=data,
+        categorical_features=cat_features,
+        training=False,
+        encoder=encoder,
     )
-    _inference = None # your code here to predict the result using data_processed
+    _inference = inference(model, data_processed)
     return {"result": apply_label(_inference)}
