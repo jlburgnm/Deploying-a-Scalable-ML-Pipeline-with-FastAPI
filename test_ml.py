@@ -29,6 +29,7 @@ def census_data():
     assert DATA_PATH.exists(), f"Missing dataset: {DATA_PATH}"
 
     data = pd.read_csv(DATA_PATH)
+    data = data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
     expected_columns = {
         "age",
@@ -100,6 +101,17 @@ def test_process_data_returns_compatible_arrays(prepared_data):
     assert X_train.shape[1] > 0
     assert np.isfinite(X_train).all()
     assert np.isfinite(X_test).all()
+
+
+def test_deterministic_compute_model_metrics():
+    """Verify metric calculations match expected mathematical outcomes deterministically."""
+    y_true = np.array([1, 1, 1, 1, 1, 0, 0, 0, 0])
+    y_pred = np.array([1, 1, 1, 0, 0, 1, 0, 0, 0])
+
+    precision, recall, fbeta = compute_model_metrics(y_true, y_pred)
+    assert precision == pytest.approx(0.75, abs=1e-6)
+    assert recall == pytest.approx(0.60, abs=1e-6)
+    assert fbeta == pytest.approx(0.6666666666666666, abs=1e-6)
 
 
 def test_model_inference_and_metrics_on_census_data(prepared_data):
