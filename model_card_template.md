@@ -1,18 +1,57 @@
-# Model Card
-
-For additional information see the Model Card paper: https://arxiv.org/pdf/1810.03993.pdf
+# Model Card: Census Adult-Income Classification Model
 
 ## Model Details
 
+This project uses a scikit-learn Logistic Regression model to classify whether an individual’s annual income is <=50K or >50K. The model uses max_iter=2000 and random_state=42.
+Categorical features are processed with OneHotEncoder(handle_unknown="ignore", sparse_output=False), and salary labels are transformed with LabelBinarizer. The saved artifacts are model.pkl, encoder.pkl, and lb.pkl. The model is served through a FastAPI endpoint at /data/.
+
 ## Intended Use
+
+The model is intended for educational and analytical purposes. It demonstrates data preprocessing, model training, evaluation, slice-based performance monitoring, automated testing, and API deployment. It should not be used to make or support high-impact decisions.
 
 ## Training Data
 
+The model uses the publicly available Census Bureau adult-income dataset in census.csv. The target column is salary, with the classes <=50K and >50K. The data was split into 80 percent training data and 20 percent test data using random_state=42 and stratification by salary. Categorical features were one-hot encoded, while numeric features were retained as numeric values.
+
 ## Evaluation Data
 
+Evaluation was performed on the held-out 20 percent test set. The evaluation included overall metrics and separate metrics for workclass, education, marital-status, occupation, relationship, race, sex, and native-country slices.
+
 ## Metrics
-_Please include the metrics used and your model's performance on those metrics._
+
+The model was evaluated using precision, recall, and F1 score. The reported F-beta score uses beta equal to 1, so it is equivalent to F1.
+
+Overall test-set performance was:
+
+•	Precision: 0.7281
+
+•	Recall: 0.6097
+
+•	F1 score: 0.6637
+
+Precision measures how many predicted >50K cases were correct. Recall measures how many actual >50K cases were identified. F1 summarizes precision and recall using their harmonic mean.
+Representative slice results included the following F1 scores:
+
+•	Sex: Female 0.6514; Male 0.6658.
+
+•	Race: Amer-Indian-Eskimo 0.5263; White 0.6703.
+
+•	Education: 10th 0.2105; HS-grad 0.3673; Bachelors 0.7856; Doctorate 0.8760; Masters 0.8512.
+
+•	Occupation: Handlers-cleaners 0.2353; Transport-moving 0.3171; Exec-managerial 0.7972; Prof-specialty 0.8084.
+
+•	Workclass: Private 0.6419; Self-emp-inc 0.7876.
+
+•	Native country: United-States 0.6679; Mexico 0.3333; Canada 0.1818.
+
+Slice metrics should be interpreted with caution; some categories contain very few examples. Small groups can produce unstable, misleadingly high, or misleadingly low scores.
 
 ## Ethical Considerations
 
+The dataset includes demographic and socioeconomic features such as race, sex, education, relationship, workclass, and native country. Historical Census data may reflect social and economic inequalities, and the model may reproduce patterns or biases present in that data. Some input features may act as proxies for sensitive characteristics. Overall accuracy or aggregate metrics do not demonstrate that the model is fair or appropriate for a particular application.
+
 ## Caveats and Recommendations
+
+The model has not been evaluated with confidence intervals, calibration analysis, external validation, threshold tuning, or a formal fairness criterion. Performance may change when the model receives data from a different population, time period, or distribution.
+
+Before any real-world use, the model should be compared with baseline models and evaluated on an independent validation dataset. The analysis would benefit from adding probability calibration, uncertainty reporting, fairness analysis selected by domain and legal experts, and monitoring for data drift and changes in slice performance. Missing values, unknown categories, API errors, and changes in class prevalence should be monitored. This model should be treated as an educational demonstration rather than a production-ready system for automated income decisions.
