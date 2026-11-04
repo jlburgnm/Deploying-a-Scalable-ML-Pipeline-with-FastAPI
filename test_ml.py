@@ -112,6 +112,6 @@ def test_model_inference_and_metrics_on_census_data(prepared_data):
 
     assert len(predictions) == len(y_test)
     assert set(np.unique(predictions)).issubset({0, 1})
-    assert 0.0 <= precision <= 1.0
-    assert 0.0 <= recall <= 1.0
-    assert 0.0 <= fbeta <= 1.0
+    assert precision == pytest.approx(0.7281035795887281, abs=1e-6)
+    assert recall == pytest.approx(0.6096938775510204, abs=1e-6)
+    assert fbeta == pytest.approx(0.6636584519264145, abs=1e-6)
